@@ -20,8 +20,11 @@ model User {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   conversationIds String[]       @db.ObjectId
+  seenMessageIds  String[]       @db.ObjectId
   conversations   Conversation[] @relation(fields: [conversationIds], references: [id])
+  seenMessages    Message[]      @relation("Seen", fields: [seenMessageIds], references: [id])
   accounts        Account[]
+  messages        Message[]
 }
 
 model Account {
@@ -48,6 +51,21 @@ model Conversation {
   lastMessageAt DateTime  @default(now())
   name          String?
   isGroup       Boolean?
+  messagesIds   String[]  @db.ObjectId
   userIds       String[]  @db.ObjectId
+  messages      Message[]
   users         User[]    @relation(fields: [userIds], references: [id])
+}
+
+model Message {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  body           String?
+  image          String?
+  createdAt      DateTime     @default(now())
+  seenIds        String[]     @db.ObjectId
+  conversationId String       @db.ObjectId
+  senderId       String       @db.ObjectId
+  seen           User[]       @relation("Seen", fields: [seenIds], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 }
